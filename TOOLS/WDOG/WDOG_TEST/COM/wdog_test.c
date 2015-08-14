@@ -82,7 +82,8 @@ static void usage(void)
 	printf("             the watchdog causes a system reset.             \n");
 	printf("             !!! CAUTION:                             !!!    \n");
 	printf("             !!! THE SYSTEM WILL BE RESET DEFINITELY  !!!    \n");
-	printf("  -s=<msec>  set watchdog-time.to <time> msec......... [none]\n");
+	printf("  -s=<msec>  set watchdog-time to <msec> msec......... [none]\n");
+	printf("             disable the watchdog if <msec> is 0 (-s=0)      \n");
 	printf("  -g         get watchdog-time........................ [none]\n");
 	printf("  -i         get watchdog-status...................... [none]\n");
 	printf("  -o         check if watchdog had shot off the system [none]\n");
@@ -135,7 +136,7 @@ int main(int argc, char *argv[])
 
 	trigTime = ((str = UTL_TSTOPT("w=")) ? atoi(str) : 0);
 	testTime = ((str = UTL_TSTOPT("t=")) ? atoi(str) : 0);
-	setTime  = ((str = UTL_TSTOPT("s=")) ? atoi(str) : 0);
+	setTime  = ((str = UTL_TSTOPT("s=")) ? atoi(str) : -1);
 	getTime  = (UTL_TSTOPT("g") ? 1 : 0);
 	status   = (UTL_TSTOPT("i") ? 1 : 0);
 	shot     = (UTL_TSTOPT("o") ? 1 : 0);
@@ -190,12 +191,23 @@ int main(int argc, char *argv[])
 	/*--------------------+
     |  set wdog-time      |
     +--------------------*/
-	if (setTime) {
+	if (0 < setTime) {
 		if ((M_setstat(path, WDOG_TIME, setTime)) < 0) {
 			PrintMdisError("setstat WDOG_TIME");
 			goto abort;
 		}
 		printf("Watchdog time set to %dmsec\n", setTime);
+	}
+
+	/*--------------------+
+    |  stop watchdog      |
+    +--------------------*/
+	if (0 == setTime) {
+		if ((M_setstat(path, WDOG_STOP, 0)) < 0) {
+			PrintMdisError("setstat WDOG_STOP");
+			goto abort;
+		}
+		printf("Watchdog stopped\n");
 	}
 
 	/*--------------------+
