@@ -70,12 +70,12 @@ static void usage(void)
 	printf("    -r         reset wdog (counter, output/irq pin)                  \n");
 	printf("    -c         clear reason of last output/irq pin assertion         \n");
 	printf("               -------------- Time Setting -------------------       \n");
-	printf("    -u=<ms>    set wdog max/upper time [ms]             [0]          \n");
+	printf("    -u=<ms>    set wdog max/upper time [ms]                          \n");
 	printf("                 0 disables the upper limit                          \n");
-	printf("    -l=<ms>    set wdog min/lower time [ms]             [0]          \n");
+	printf("    -l=<ms>    set wdog min/lower time [ms]                          \n");
 	printf("                 0 disables the lower limit                          \n");
 	printf("    -q=<ms>    set wdog irq time [ms]                                \n");
-	printf("                 0 disables the irq usage               [0]          \n");
+	printf("                 0 disables the irq usage                            \n");
 	printf("               -------------- Manual Switching -------------------   \n");
 	printf("    -o=<0,1>   0=clear, 1=set output pin                             \n");
 	printf("    -i=<0,1>   0=clear, 1=set irq pin                                \n");
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 	char	*device, *str, *errstr, buf[40];
 	u_int32	n, count = 0;
 	int32	get, reset, clear, maxT, minT, irqT, outP, irqP, errP;
-	int32	trig, trigPat, trigT, incrT, pat;
+	int32	trig, trigPat, trigT, incrT, pat, patIdx;
 	int		ret=ERR_OK;
 
 	/*----------------------+
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 		usage();
 		return ERR_PARAM;
 	}
-	if (argc < 2) {
+	if (argc < 3) {
 		usage();
 		return ERR_PARAM;
 	}
@@ -138,9 +138,9 @@ int main(int argc, char *argv[])
 	get     = (UTL_TSTOPT("g") ? 1 : 0);
 	reset   = (UTL_TSTOPT("r") ? 1 : 0);
 	clear   = (UTL_TSTOPT("c") ? 1 : 0);
-	maxT    = ((str = UTL_TSTOPT("u=")) ? atoi(str) : 0);
-	minT    = ((str = UTL_TSTOPT("l=")) ? atoi(str) : 0);
-	irqT    = ((str = UTL_TSTOPT("q=")) ? atoi(str) : 0);
+	maxT    = ((str = UTL_TSTOPT("u=")) ? atoi(str) : -1);
+	minT    = ((str = UTL_TSTOPT("l=")) ? atoi(str) : -1);
+	irqT    = ((str = UTL_TSTOPT("q=")) ? atoi(str) : -1);
 	outP    = ((str = UTL_TSTOPT("o=")) ? atoi(str) : -1);
 	irqP    = ((str = UTL_TSTOPT("i=")) ? atoi(str) : -1);
 	errP    = ((str = UTL_TSTOPT("e=")) ? atoi(str) : -1);
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 	if (reset){
 		if ((M_setstat(G_path, WDOG_RESET_CTRL ,0)) < 0) {
 			ret = PrintError("setstat WDOG_RESET_CTRL");
-			goto abort;
+			goto ABORT;;
 		}
 	}
 
@@ -200,62 +200,68 @@ int main(int argc, char *argv[])
 			ret = PrintError("setstat WDOG_IRQ_REASON");
 		}
 		if (ret!=ERR_OK)
-			goto abort;
+			goto ABORT;;
 	}
 
 	/*----------------------+
 	|  time setting [ms]    |
 	+----------------------*/
-	if ((M_setstat(G_path, WDOG_TIME_MAX, maxT / 1000)) < 0) {
-		PrintError("setstat WDOG_TIME_MAX");
+	if (maxT != -1) {
+		if ((M_setstat(G_path, WDOG_TIME_MAX, maxT * 1000)) < 0) {
+			PrintError("setstat WDOG_TIME_MAX");
 
-		/* try to set max time with older setstat code */
-		if ((M_setstat(G_path, WDOG_TIME, maxT)) < 0) {
-			ret = PrintError("setstat WDOG_TIME");
-			goto abort;
+			/* try to set max time with older setstat code */
+			if ((M_setstat(G_path, WDOG_TIME, maxT)) < 0) {
+				ret = PrintError("setstat WDOG_TIME");
+				goto ABORT;;
+			}
+
+			printf("max time set with older setstat code WDOG_TIME\n");
 		}
-
-		printf("max time set with older setstat code WDOG_TIME\n");
 	}
 
-	if ((M_setstat(G_path, WDOG_TIME_MIN, minT / 1000)) < 0) {
-		ret = PrintError("setstat WDOG_TIME_MIN");
-		goto abort;
+	if (minT != -1) {
+		if ((M_setstat(G_path, WDOG_TIME_MIN, minT * 1000)) < 0) {
+			ret = PrintError("setstat WDOG_TIME_MIN");
+			goto ABORT;;
+		}
 	}
 
-	if ((M_setstat(G_path, WDOG_TIME_IRQ, irqT / 1000)) < 0) {
-		ret = PrintError("setstat WDOG_TIME_IRQ");
-		goto abort;
+	if (irqT != -1) {
+		if ((M_setstat(G_path, WDOG_TIME_IRQ, irqT * 1000)) < 0) {
+			ret = PrintError("setstat WDOG_TIME_IRQ");
+			goto ABORT;;
+		}
 	}
 
 	/*----------------------+
 	|  manual switching     |
 	+----------------------*/
-	if (outP) {
+	if (outP != -1) {
 		if ((M_setstat(G_path, WDOG_OUT_PIN, outP)) < 0) {
 			ret = PrintError("setstat WDOG_OUT_PIN");
-			goto abort;
+			goto ABORT;;
 		}
 	}
 
-	if (irqP) {
+	if (irqP != -1) {
 		if ((M_setstat(G_path, WDOG_IRQ_PIN, irqP)) < 0) {
 			ret = PrintError("setstat WDOG_IRQ_PIN");
-			goto abort;
+			goto ABORT;;
 		}
 	}
 
-	if (errP) {
+	if (errP != -1) {
 		if ((M_setstat(G_path, WDOG_ERR_PIN, errP)) < 0) {
 			ret = PrintError("setstat WDOG_ERR_PIN");
-			goto abort;
+			goto ABORT;;
 		}
 	}
 
 	/*----------------------+
 	|  configure interrupt  |
 	+----------------------*/
-	if (irqT){
+	if (irqT != -1){
 					
 		/* install signal handler */
 		UOS_SigInit( SignalHandler );
@@ -263,13 +269,13 @@ int main(int argc, char *argv[])
 			
 		if ((M_setstat(G_path, WDOG_IRQ_SIGSET, UOS_SIG_USR1)) < 0) {
 			ret = PrintError("setstat WDOG_IRQ_SIGSET");
-			goto abort;
+			goto ABORT;;
 		}	
 
 		/* enable interrupt */
 		if ((M_setstat(G_path, M_MK_IRQ_ENABLE, TRUE)) < 0) {
 			ret = PrintError("setstat M_MK_IRQ_ENABLE");
-			goto abort;
+			goto ABORT;;
 		}
 	}
 
@@ -282,12 +288,28 @@ int main(int argc, char *argv[])
 	/*--------------------+
 	|  watch              |
 	+--------------------*/
-	if ( trigT != -1 ){
+	if (trigT != -1){
+
+		/* trigger with pattern */
+		if (trigPat != -1) {
+
+			/* get last used pattern */
+			if ((M_getstat(G_path, WDOG_TRIG_PAT, &pat)) < 0) {
+				PrintError("getstat WDOG_TRIG_PAT");
+				goto ABORT;;
+			}
+
+			/* compute initial pattern to use */
+			if( pat == WDOG_TRIGPAT(0))
+				patIdx = 1;
+			else
+				patIdx = 0;
+		}
 
 		/* start watchdog */
 		if ((M_setstat(G_path, WDOG_START, 0)) < 0) {
 			PrintError("setstat WDOG_START");
-			goto abort;
+			goto ABORT;;
 		}
 		printf("Watchdog started - trigger all %dmsec\n", trigT);
 
@@ -298,13 +320,14 @@ int main(int argc, char *argv[])
 
 			/* trigger with pattern */
 			if (trigPat != -1){
-				pat = WDOG_TRIGPAT(count & 1);
+				pat = WDOG_TRIGPAT(patIdx);
 				printf("#%06d: Trigger watchdog with pattern 0x%x after %dms (press any key to abort)\n",
 					count, pat, trigT);
 				if ((M_setstat(G_path, WDOG_TRIG_PAT, pat)) < 0) {
 					PrintError("setstat WDOG_TRIG_PAT");
-					goto abort;
+					goto ABORT;;
 				}
+				patIdx ^= 1;
 			}
 			/* trigger without pattern */
 			else {
@@ -312,7 +335,7 @@ int main(int argc, char *argv[])
 					count, trigT);
 				if ((M_setstat(G_path, WDOG_TRIG, 0)) < 0) {
 					PrintError("setstat WDOG_TRIG");
-					goto abort;
+					goto ABORT;;
 				}
 			}
 
@@ -325,7 +348,7 @@ int main(int argc, char *argv[])
 		/* try to stop watchdog */
 		if ((M_setstat(G_path, WDOG_STOP, 0)) < 0) {
 			PrintError("setstat WDOG_STOP");
-			goto abort;
+			goto ABORT;;
 		}
 		printf("Watchdog stopped\n");
 	}
@@ -335,7 +358,19 @@ int main(int argc, char *argv[])
 	+----------------------*/
 	ret=ERR_OK;
 	
-abort:
+	if (irqT != -1) {
+		if ((M_setstat(G_path, WDOG_IRQ_SIGCLR, UOS_SIG_USR1)) < 0) {
+			ret = PrintError("setstat WDOG_IRQ_SIGCLR");
+			goto ABORT;
+		}
+
+		UOS_SigRemove(UOS_SIG_USR1);
+		UOS_SigExit();
+	}
+
+	ret = ERR_OK;
+
+ABORT:
 	if (M_close(G_path) < 0)
 		ret = PrintError("close");
 
@@ -353,7 +388,7 @@ static int GetInfo(void)
 	char *str;
 
 	/* ----------- codes before 2016 ----------- */
-	printf("WDOG_TIME       - MAX time: ");
+	printf("WDOG_TIME (MAX time)                  : ");
 	if ((M_getstat(G_path, WDOG_TIME, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -361,7 +396,7 @@ static int GetInfo(void)
 		printf("%dms\n", val);
 	}
 
-	printf("WDOG_STATUS     - counter state: ");
+	printf("WDOG_STATUS (counter state)           : ");
 	if ((M_getstat(G_path, WDOG_STATUS, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -369,7 +404,7 @@ static int GetInfo(void)
 		printf("%s\n", val ? "enabled" : "disabled");
 	}
 
-	printf("WDOG_SHOT       - shot info: ");
+	printf("WDOG_SHOT (shot info)                 : ");
 	if ((M_getstat(G_path, WDOG_SHOT, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -384,31 +419,39 @@ static int GetInfo(void)
 	}
 
 	/* ----------- additional codes since 2016 ----------- */
-	printf("WDOG_TIME_MIN   - MIN time: ");
+	printf("WDOG_TRIG_PAT (last used pattern)     : ");
+	if ((M_getstat(G_path, WDOG_TRIG_PAT, &val)) < 0) {
+		PRINT_ERR
+	}
+	else {
+		printf("0x%x\n", val);
+	}
+
+	printf("WDOG_TIME_MIN (MIN time)              : ");
 	if ((M_getstat(G_path, WDOG_TIME_MIN, &val)) < 0) {
 		PRINT_ERR
 	}
 	else {
-		printf("%dus\n", val);
+		printf("%dms (%dus)\n", val/1000, val);
 	}
 
-	printf("WDOG_TIME_MAX   - MAX time: ");
+	printf("WDOG_TIME_MAX (MAX time)              : ");
 	if ((M_getstat(G_path, WDOG_TIME_MAX, &val)) < 0) {
 		PRINT_ERR
 	}
 	else {
-		printf("%dus\n", val);
+		printf("%dms (%dus)\n", val / 1000, val);
 	}
 
-	printf("WDOG_TIME_IRQ   - IRQ time: ");
+	printf("WDOG_TIME_IRQ (IRQ time)              : ");
 	if ((M_getstat(G_path, WDOG_TIME_IRQ, &val)) < 0) {
 		PRINT_ERR
 	}
 	else {
-		printf("%dus\n", val);
+		printf("%dms (%dus)\n", val / 1000, val);
 	}
 
-	printf("WDOG_OUT_PIN    - out pin: ");
+	printf("WDOG_OUT_PIN (out pin)                : ");
 	if ((M_getstat(G_path, WDOG_OUT_PIN, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -416,7 +459,7 @@ static int GetInfo(void)
 		printf("%s\n", val ? "set" : "cleared");
 	}
 
-	printf("WDOG_OUT_REASON - last out pin reason: ");
+	printf("WDOG_OUT_REASON (last out pin reason) : ");
 	if ((M_getstat(G_path, WDOG_OUT_REASON, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -431,7 +474,7 @@ static int GetInfo(void)
 		printf("%s\n", str);
 	}
 
-	printf("WDOG_IRQ_PIN    - irq pin: ");
+	printf("WDOG_IRQ_PIN (irq pin)                : ");
 	if ((M_getstat(G_path, WDOG_IRQ_PIN, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -439,7 +482,7 @@ static int GetInfo(void)
 		printf("%s\n", val ? "set" : "cleared");
 	}
 
-	printf("WDOG_IRQ_REASON - last irq pin reason: ");
+	printf("WDOG_IRQ_REASON (last irq pin reason) : ");
 	if ((M_getstat(G_path, WDOG_IRQ_REASON, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -453,7 +496,7 @@ static int GetInfo(void)
 		printf("%s\n", str);
 	}
 
-	printf("WDOG_ERR_PIN    - err pin: ");
+	printf("WDOG_ERR_PIN (err pin)                : ");
 	if ((M_getstat(G_path, WDOG_ERR_PIN, &val)) < 0) {
 		PRINT_ERR
 	}
@@ -486,8 +529,10 @@ static void __MAPILIB SignalHandler(u_int32 sig)
 
 /***************************************************************************/
 /** Print MDIS error message
- *G_portm
+ *
  *  \param info       \IN  info string
+ *
+ *  \return           ERR_FUNC
  */
 static int PrintError(char *info)
 {
