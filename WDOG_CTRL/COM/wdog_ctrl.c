@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 	if (reset){
 		if ((M_setstat(G_path, WDOG_RESET_CTRL ,0)) < 0) {
 			ret = PrintError("setstat WDOG_RESET_CTRL");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 			ret = PrintError("setstat WDOG_IRQ_REASON");
 		}
 		if (ret!=ERR_OK)
-			goto ABORT;;
+			goto ABORT;
 	}
 
 	/*----------------------+
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 			/* try to set max time with older setstat code */
 			if ((M_setstat(G_path, WDOG_TIME, maxT)) < 0) {
 				ret = PrintError("setstat WDOG_TIME");
-				goto ABORT;;
+				goto ABORT;
 			}
 
 			printf("max time set with older setstat code WDOG_TIME\n");
@@ -223,14 +223,14 @@ int main(int argc, char *argv[])
 	if (minT != -1) {
 		if ((M_setstat(G_path, WDOG_TIME_MIN, minT * 1000)) < 0) {
 			ret = PrintError("setstat WDOG_TIME_MIN");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
 	if (irqT != -1) {
 		if ((M_setstat(G_path, WDOG_TIME_IRQ, irqT * 1000)) < 0) {
 			ret = PrintError("setstat WDOG_TIME_IRQ");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
@@ -240,21 +240,21 @@ int main(int argc, char *argv[])
 	if (outP != -1) {
 		if ((M_setstat(G_path, WDOG_OUT_PIN, outP)) < 0) {
 			ret = PrintError("setstat WDOG_OUT_PIN");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
 	if (irqP != -1) {
 		if ((M_setstat(G_path, WDOG_IRQ_PIN, irqP)) < 0) {
 			ret = PrintError("setstat WDOG_IRQ_PIN");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
 	if (errP != -1) {
 		if ((M_setstat(G_path, WDOG_ERR_PIN, errP)) < 0) {
 			ret = PrintError("setstat WDOG_ERR_PIN");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
@@ -269,13 +269,13 @@ int main(int argc, char *argv[])
 			
 		if ((M_setstat(G_path, WDOG_IRQ_SIGSET, UOS_SIG_USR1)) < 0) {
 			ret = PrintError("setstat WDOG_IRQ_SIGSET");
-			goto ABORT;;
+			goto ABORT;
 		}	
 
 		/* enable interrupt */
 		if ((M_setstat(G_path, M_MK_IRQ_ENABLE, TRUE)) < 0) {
 			ret = PrintError("setstat M_MK_IRQ_ENABLE");
-			goto ABORT;;
+			goto ABORT;
 		}
 	}
 
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
 			/* get last used pattern */
 			if ((M_getstat(G_path, WDOG_TRIG_PAT, &pat)) < 0) {
 				PrintError("getstat WDOG_TRIG_PAT");
-				goto ABORT;;
+				goto ABORT;
 			}
 
 			/* compute initial pattern to use */
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
 		/* start watchdog */
 		if ((M_setstat(G_path, WDOG_START, 0)) < 0) {
 			PrintError("setstat WDOG_START");
-			goto ABORT;;
+			goto ABORT;
 		}
 		printf("Watchdog started - trigger all %dmsec\n", trigT);
 
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
 					count, pat, trigT);
 				if ((M_setstat(G_path, WDOG_TRIG_PAT, pat)) < 0) {
 					PrintError("setstat WDOG_TRIG_PAT");
-					goto ABORT;;
+					goto ABORT;
 				}
 				patIdx ^= 1;
 			}
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
 					count, trigT);
 				if ((M_setstat(G_path, WDOG_TRIG, 0)) < 0) {
 					PrintError("setstat WDOG_TRIG");
-					goto ABORT;;
+					goto ABORT;
 				}
 			}
 
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
 		/* try to stop watchdog */
 		if ((M_setstat(G_path, WDOG_STOP, 0)) < 0) {
 			PrintError("setstat WDOG_STOP");
-			goto ABORT;;
+			goto ABORT;
 		}
 		printf("Watchdog stopped\n");
 	}
@@ -448,7 +448,7 @@ static int GetInfo(void)
 		PRINT_ERR
 	}
 	else {
-		printf("%dms (%dus)\n", val / 1000, val);
+		printf("%dms (%dus) - may be cleared from drv-exit\n", val / 1000, val);
 	}
 
 	printf("WDOG_OUT_PIN (out pin)                : ");
