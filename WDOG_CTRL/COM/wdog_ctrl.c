@@ -82,9 +82,11 @@ static void usage(void)
 	printf("    -e=<0,1>   0=clear, 1=set error pin                              \n");
 	printf("               -------------- Loop Operations -------------------    \n");
 	printf("    -T=<ms>    start wdog, trigger all <ms> until keypress, stop wdog\n");
-	printf("    -P=<ms>    same as -t but trigger with alternating pattern\n");
-	printf("    -I=<ms>    increment trigger time at each loop pass [0]\n");
-	printf("    -R=<ms>    reset wdog at irq signal after <ms>\n");
+	printf("    -P=<ms>    same as -t but trigger with alternating pattern       \n");
+	printf("    -I=<ms>    increment trigger time at each loop pass [0]          \n");
+	printf("    -R=<ms>    reset wdog at irq signal after <ms>                   \n");
+	printf("    -A=<n>     abort after n passes                                  \n");
+	printf("    -V         verbose output                                        \n");
 	printf("\n");
 	printf("(c)Copyright 2016 by MEN Mikro Elektronik GmbH (%s)\n", __DATE__);
 }
@@ -102,13 +104,15 @@ int main(int argc, char *argv[])
 	char	*device, *str, *errstr, buf[40];
 	u_int32	n, count = 0;
 	int32	get, reset, clear, maxT, minT, irqT, outP, irqP, errP;
-	int32	trig, trigPat, trigT, incrT, pat, patIdx;
+	int32	trig, trigPat, trigT, incrT, pat, patIdx=0;
+	int32	abort, loop, loopcnt, verbose;
+
 	int		ret=ERR_OK;
 
 	/*----------------------+
 	|  check arguments      |
 	+----------------------*/
-	if ((errstr = UTL_ILLIOPT("grcu=l=q=o=i=e=T=P=I=R=?", buf))) {
+	if ((errstr = UTL_ILLIOPT("grcu=l=q=o=i=e=T=P=I=R=A=V?", buf))) {
 		printf("*** %s\n", errstr);
 		return ERR_PARAM;
 	}
@@ -148,7 +152,9 @@ int main(int argc, char *argv[])
 	trigPat = ((str = UTL_TSTOPT("P=")) ? atoi(str) : -1);
 	incrT   = ((str = UTL_TSTOPT("I=")) ? atoi(str) : 0);
 	G_rst   = ((str = UTL_TSTOPT("R=")) ? atoi(str) : -1);
-	
+	abort   = ((str = UTL_TSTOPT("A=")) ? atoi(str) : -1);
+	verbose = (UTL_TSTOPT("V") ? 1 : 0);
+
 	/* further parameter checking */
 	if ((trig != -1) && (trigPat != -1)) {
 		printf("*** -T and -P specified, this is not supported\n");
@@ -288,6 +294,8 @@ int main(int argc, char *argv[])
 	/*--------------------+
 	|  watch              |
 	+--------------------*/
+	loopcnt = 0;
+	loop = 1;
 	if (trigT != -1){
 
 		/* trigger with pattern */
@@ -321,8 +329,9 @@ int main(int argc, char *argv[])
 			/* trigger with pattern */
 			if (trigPat != -1){
 				pat = WDOG_TRIGPAT(patIdx);
-				printf("#%06d: Trigger watchdog with pattern 0x%x after %dms (press any key to abort)\n",
-					count, pat, trigT);
+				if (verbose)
+					printf("#%06d: Trigger watchdog with pattern 0x%x after %dms (press any key to abort)\n",
+						count, pat, trigT);
 				if ((M_setstat(G_path, WDOG_TRIG_PAT, pat)) < 0) {
 					PrintError("setstat WDOG_TRIG_PAT");
 					goto ABORT;
@@ -331,19 +340,39 @@ int main(int argc, char *argv[])
 			}
 			/* trigger without pattern */
 			else {
-				printf("#%06d: Trigger watchdog after %dms (press any key to abort)\n",
-					count, trigT);
+				if (verbose)
+					printf("#%06d: Trigger watchdog after %dms (press any key to abort)\n",
+						count, trigT);
 				if ((M_setstat(G_path, WDOG_TRIG, 0)) < 0) {
 					PrintError("setstat WDOG_TRIG");
 					goto ABORT;
 				}
 			}
 
+			if (!verbose) {
+				printf(".");
+				fflush(stdout);
+			}
+
 			/* increment delay for next pass */
 			if (incrT)
 				trigT += incrT;
 
-		} while (UOS_KeyPressed() == -1);
+			/* repeat until keypress */
+			if (UOS_KeyPressed() != -1)
+				loop = 0;
+
+			/* abort after n passes */
+			if (abort){
+				loopcnt++;
+				if (loopcnt==abort)
+					loop = 0;
+			}
+					
+		} while (loop);
+
+		if (!verbose)
+			printf("\n");
 
 		/* try to stop watchdog */
 		if ((M_setstat(G_path, WDOG_STOP, 0)) < 0) {
