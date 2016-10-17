@@ -82,7 +82,7 @@ static void usage(void)
 	printf("    -e=<0,1>   0=clear, 1=set error pin                              \n");
 	printf("               -------------- Loop Operations -------------------    \n");
 	printf("    -T=<ms>    start wdog, trigger all <ms> until keypress, stop wdog\n");
-	printf("    -P=<ms>    same as -t but trigger with alternating pattern       \n");
+	printf("    -P=<ms>    same as -T but trigger with alternating pattern       \n");
 	printf("    -I=<ms>    increment trigger time at each loop pass [0]          \n");
 	printf("    -R=<ms>    reset wdog at irq signal after <ms>                   \n");
 	printf("    -A=<n>     abort after n passes                                  \n");
