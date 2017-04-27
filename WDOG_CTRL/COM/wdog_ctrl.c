@@ -102,10 +102,11 @@ static void usage(void)
 int main(int argc, char *argv[])
 {
 	char	*device, *str, *errstr, buf[40];
-	u_int32	n, count = 0;
+	u_int32	count = 0;
 	int32	get, reset, clear, maxT, minT, irqT, outP, irqP, errP;
 	int32	trig, trigPat, trigT, incrT, pat, patIdx=0;
 	int32	abort, loop, loopcnt, verbose;
+	int		n;
 
 	int		ret=ERR_OK;
 
