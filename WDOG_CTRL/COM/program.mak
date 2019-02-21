@@ -6,11 +6,8 @@
 #
 #    Description: Makefile definitions for WDOG_CTRL tool
 #
-#---------------------------------[ History ]---------------------------------
-#
-#   $Log: program.mak,v $
 #-----------------------------------------------------------------------------
-#   (c) Copyright 2016 by MEN mikro elektronik GmbH, Nuernberg, Germany
+#   Copyright (c) 2016-2019, MEN Mikro Elektronik GmbH
 #*****************************************************************************
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

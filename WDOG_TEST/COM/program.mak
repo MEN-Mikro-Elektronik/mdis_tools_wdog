@@ -6,17 +6,8 @@
 #
 #    Description: Makefile definitions for WDOG_TEST tool
 #
-#---------------------------------[ History ]---------------------------------
-#
-#   $Log: program.mak,v $
-#   Revision 1.2  2004/09/02 15:14:18  dpfeuffer
-#   minor modifications for MDIS4/2004 conformity
-#
-#   Revision 1.1  1999/06/23 12:07:48  Schmidt
-#   Initial Revision
-#
 #-----------------------------------------------------------------------------
-#   (c) Copyright 1999 by MEN mikro elektronik GmbH, Nuernberg, Germany
+#   Copyright (c) 1999-2019, MEN Mikro Elektronik GmbH
 #*****************************************************************************
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

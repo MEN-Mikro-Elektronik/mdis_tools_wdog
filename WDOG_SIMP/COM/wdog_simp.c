@@ -16,21 +16,9 @@
  *     Required: libraries: mdis_api, usr_oss
  *     Switches: -
  *
- *-------------------------------[ History ]---------------------------------
- *
- * $Log: wdog_simp.c,v $
- * Revision 1.3  2009/08/31 14:14:23  MRoth
- * R: Porting to MDIS5
- * M: added support for 64bit (MDIS_PATH)
- *
- * Revision 1.2  2004/09/02 15:14:20  dpfeuffer
- * minor modifications for MDIS4/2004 conformity
- *
- * Revision 1.1  1999/06/23 12:07:49  Schmidt
- * Initial Revision
  *
  *---------------------------------------------------------------------------
- * (c) Copyright 1999 by MEN mikro elektronik GmbH, Nuremberg, Germany
+ * Copyright (c) 1999-2019, MEN Mikro Elektronik GmbH
  ******************************************************************************/
 /*
  * This program is free software: you can redistribute it and/or modify
