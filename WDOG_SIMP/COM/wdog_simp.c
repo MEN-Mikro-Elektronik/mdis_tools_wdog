@@ -5,8 +5,6 @@
  ****************************************************************************
  *
  *       Author: ds
- *        $Date: 2009/08/31 14:14:23 $
- *    $Revision: 1.3 $
  *
  *  Description: Simple example program for Watchdog drivers.
  *

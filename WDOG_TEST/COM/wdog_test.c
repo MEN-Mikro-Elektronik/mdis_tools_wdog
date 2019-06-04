@@ -5,8 +5,6 @@
  ****************************************************************************
  *
  *       Author: ds
- *        $Date: 2009/08/31 12:17:57 $
- *    $Revision: 1.5 $
  *
  *  Description: Configure and serve Watchdog
  *
@@ -39,6 +37,8 @@
 #include <MEN/usr_utl.h>
 #include <MEN/mdis_api.h>
 #include <MEN/wdog.h>
+
+static const char IdentString[]=MENT_XSTR(MAK_REVISION);
 
 /*--------------------------------------+
 |   PROTOTYPES                          |
@@ -84,7 +84,7 @@ static void usage(void)
 	printf("  -i         get watchdog-status...................... [none]\n");
 	printf("  -o         check if watchdog had shot off the system [none]\n");
 	printf("\n");
-	printf("(c) 1999 by MEN mikro elektronik GmbH\n\n");
+	printf("Copyright (c) 1999-2019, MEN Mikro Elektronik GmbH\n%s\n", IdentString);
 }
 
 /********************************* main *************************************

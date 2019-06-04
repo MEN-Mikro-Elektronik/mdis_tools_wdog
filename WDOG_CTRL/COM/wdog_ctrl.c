@@ -20,8 +20,6 @@
 /*!
  *        \file  wdog_ctrl.c
  *      \author  dieter.pfeuffer@men.de
- *        $Date: $
- *    $Revision: $
  *
  *       \brief  Control tool for WDOG profile drivers (e.g. Z47)
  *
@@ -44,6 +42,8 @@
 #include <MEN/usr_oss.h>
 #include <MEN/usr_utl.h>
 #include <MEN/wdog.h>
+
+static const char IdentString[]=MENT_XSTR(MAK_REVISION);
 
 /*--------------------------------------+
 |   DEFINES                             |
@@ -100,7 +100,7 @@ static void usage(void)
 	printf("    -A=<n>     abort after n passes                                  \n");
 	printf("    -V         verbose output                                        \n");
 	printf("\n");
-	printf("(c)Copyright 2016 by MEN Mikro Elektronik GmbH (%s)\n", __DATE__);
+	printf("Copyright (c) 2016-2019, MEN Mikro Elektronik GmbH\n%s\n", IdentString);
 }
 
 /***************************************************************************/
