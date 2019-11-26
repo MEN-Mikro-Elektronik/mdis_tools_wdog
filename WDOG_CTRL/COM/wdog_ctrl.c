@@ -28,7 +28,7 @@
  */
  /*
  *---------------------------------------------------------------------------
- * Copyright (c) 2016-2019, MEN Mikro Elektronik GmbH
+ * Copyright 2016-2019, MEN Mikro Elektronik GmbH
  ****************************************************************************/
 
 /*--------------------------------------+
@@ -100,7 +100,7 @@ static void usage(void)
 	printf("    -A=<n>     abort after n passes                                  \n");
 	printf("    -V         verbose output                                        \n");
 	printf("\n");
-	printf("Copyright (c) 2016-2019, MEN Mikro Elektronik GmbH\n%s\n", IdentString);
+	printf("Copyright 2016-2019, MEN Mikro Elektronik GmbH\n%s\n", IdentString);
 }
 
 /***************************************************************************/

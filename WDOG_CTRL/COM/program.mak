@@ -5,7 +5,7 @@
 #    Description: Makefile definitions for WDOG_CTRL tool
 #
 #-----------------------------------------------------------------------------
-#   Copyright (c) 2016-2019, MEN Mikro Elektronik GmbH
+#   Copyright 2016-2019, MEN Mikro Elektronik GmbH
 #*****************************************************************************
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
